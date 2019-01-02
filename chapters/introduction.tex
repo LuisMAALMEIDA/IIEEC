@@ -1,0 +1,38 @@
+%!TEX root = ../dissertation.tex
+
+\chapter{Introduction}
+\label{chapter:introduction}
+%Your introduction here...\\
+
+% A demonstration of how to use acronyms and glossary:
+%A \gls{MSc} entry.
+
+%Second use: \gls{IST}.
+
+% Plurals: \glspl{MSc}.
+
+% A citation example \cite{nobody}
+In the world of robotics, the creation of humanoid robots that mimic humans has always been an ambition of the scientific community. For that to happen is necessary that all aspects of the robot behavior are consistent with the humans ones.
+\par
+One of the most important aspects in our daily lives and a human basic need consists in grasping, moving and handling of objects. Therefore  for the robot to imitate the dexterity of the human hand, it must be able to discover the best configuration of its fingers on the object that intends to grasp for each real-world situation.
+\par
+For this to happen, it is necessary to quantify the quality of a grasp, in order to choose the best grasp to be applied to an object. Before continuing any further on giving a intuition on grasp quality measures that will be presented in the next chapter, it will be explained simple concepts about this subject and a quick note on the two existing types of robotic hands.
+\par
+One of the most important concepts is the notion of contact points. They are the points on the phalanges that are in contact with the object when it is grasped. The other concept that is important is the notion of wrench. The wrench describes a set of forces and torques that can be applied to each contact, each finger or the object itself. On a mathematical point of view on a 3D-space the wrench can be expressed as $w = [F^T\ \tau^T]^T$ in which $F\in \rm I\!R^{3}$ and $\tau \in \rm I\!R^{3}$.
+\par
+There are two types of hands: the multi-fingered and the underactuated hands. The multi-fingered hand has an actuator for each joint that links two phalanges, on all fingers of the hand. Due to the dimension of actuators, they are placed on the robotic arm. The underactuated hands are human based, in the sense that the way the hand closes is identical to the human hand, since it tries to mimic the human tendons with the pulley-tendon system (in which the closure of each finger is controlled by a string that is connected to one actuator).
+The advantage of using underactuated hands instead of the multi-fingered ones relies on their simple kinematics, intrinsic compliance and versatility for grasping objects.
+Also, since underactuated hands use postural synergies from human hands, they lead to better grasps. These postural synergies are a high level coordinated movements that the human brain uses to control the movements and the hand's shape when grasping an object.
+\par
+One classical and the most popular grasp quality measure is the "Largest-minimum resisted wrench" \cite{ferrari1992planning}. This metric is defined as being the largest perturbation wrench in any direction that the grasp can withstand. 
+\par
+There are other metrics based on the geometrical properties of the hand such as the Grasp Matrix ($G$), which expresses the relation between the forces ($f$) on the contact points and the total wrench ($w$) applied at the object, and the relation between the twist ($\Dot{x}$) of the object and the velocities at the contact points. One of the metrics that is based on Grasp matrix is the "Minimum singular value of $G$" \cite{roa2015grasp}, where $G$ has 6 single values that represents the capability of withstanding external wrench for at least one direction. So the highest the minimum singular value is, the most stable and robust the grasp can be.
+\par
+These metrics above can be applied to both multi-fingered and underactuated hands. Some other metrics were developed to deal with the fact that the joints aren't perfectly rigid, and hence its pose uncertainty. Two metrics that will be explained in a further chapter are "Potential Contract Robustness" (PCR) and "Potential Grasp Robustness" (PGR) \cite{pozzi2016grasp}. The PCR admits that the contact points' and joints' stiffness can be linearly modeled by 2 matrices (one by each). Also the PCR keeps the record of the contact point that is more close from slippage or to be detached from the object and hence this contact point will limit the maximum resisted wrench by the hand.
+The PGR differs from PCR once it considers that there may be detached contact points and the grasp can still be consider stable and robust. The advantage of using PGR instead of PCR is that PCR in some grasps can be underestimated due to the fact that some of the contact points are detached from the object.
+\par
+At last but not least, there is one metric that seems to be promising. This metric \cite{kim2013physically} focus more on the grasping process, which usually involves changes on object pose. Furthermore this metric uses dynamic simulation that take into account physical laws like the gravity law which plays a huge role on choosing the best hand configuration for grasping an object. Also the pose uncertainty is consider in this metric due to the noise associated with camera-based object pose estimation system. 
+\par
+The main objective of this thesis is to implement a set of software modules that allow to compute online grasp metrics explained above on the underactuated hand of the robot Vizzy \cite{moreno2016vizzy}, and then compare them to the best hand configuration chosen on the simulation environment in order to verify if the grasp performed by Vizzy is successful or not.
+\par
+In order to calculate the metrics in real time, Vizzy has tactile sensors along the phalanges in all fingers, in which each tactile sensor estimates the 3D force (at the contact point) made in the object grasped. More information about the tactile sensors can be found in \cite{paulino2017low}.
