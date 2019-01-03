@@ -5,3 +5,28 @@
 \section{Planning Optimal Grasps \cite{ferrari1992planning}}
 
 This paper explains the metric of the "Largest-minimum resisted wrench" that attempts to find a largest resisted wrench in any direction. To do this, the metric takes into account the total finger force and the maximum force done by the finger.
+\par
+It is assumed that the grasp's configuration used is a Force Closure Grasp (FCG), whose definition is a grasp that is able to balance externally applied forces and torques on the object (grasps that can not balance external torques and forces are not considered).
+It is also assumed that the contacts between the object and the points of contact are "Hard-Contact", i.e. between the two contact surfaces (of the object and the contact point) there is friction.
+\par
+The forces and torques that acts on an object or on contact points can be represented in a 6 dimensions space (3 dimensions for the total momentum acting on the object and the other 3 dimensions to represent the force). This space is called the wrench space ($\mathcal{W}$). To simplify, a wrench can be expressed as set of force ($F$) and torque ($\tau$) vectors, and from a mathematical point of view, the wrench can be defined as $w = [F^T\ \tau^T]^T$ and its magnitude by $||w|| = \sqrt{||F||^2 + \lambda||\tau||^2}$, where $\lambda$ is a scaling value between force and torque.
+
+\subsection{The quality of the grasp}
+When it comes time to choose measurement quality, there may be configurations that are better than others, i.e. there are configurations can balance these external wrenches without having to apply too much force. An intuitive way to quantify the grasp quality would be to use the ratio of the magnitude of the largest resisted wrench in any direction and the magnitude of the forces applied by the fingers.
+
+\subsubsection{Representing the finger forces}
+
+In order to compute the forces made by the fingers on the objects, it is necessary to ensure that there is no slipping or detachment of the object at that contact point.
+For this to happen, it is necessary that the Coulomb's law should be verified.
+
+Coulomb's law can be defined as: $f_i^{\bot} \ge \mu f_i^t$ where $f_i^{\bot}$ represents the force along the normal to the object's surface on the contact point and $ f_i^t$ is the tangential force to the object surface. 
+This law can be graphically interpreted through a friction cone, that when the force exerted on the object is inside that cone, the contact point is stable, otherwise there is slipping of the object or its detachment.
+
+The forces acting on the object can be decomposed as linear combinations of the extrema of the friction cone. So in order to do this, the friction cone can be approximated by a with a pyramid of m edges.
+Thus the force applied at the contact point ($f_i$) can be given by the expression \eqref{eq:primitive_forces}, where $\alpha_h > 0$ and $\sum_{h=1}^{m}\alpha_h = 1   $
+
+\begin{equation}\label{eq:primitive_forces}
+    f_i= \sum_{h=1}^{m}\alpha_{i,j}f_{i,h}
+\end{equation}
+    
+
