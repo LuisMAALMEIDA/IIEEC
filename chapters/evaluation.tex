@@ -2,17 +2,18 @@
 
 \chapter{Background: State of the art}
 \label{chapter:evaluation}
-\section{Planning Optimal Grasps \cite{ferrari1992planning}}
+\section{Planning Optimal Grasps}
+\label{section:LMRW}
 
-This paper explains the metric of the "Largest-minimum resisted wrench" that attempts to find a largest resisted wrench in any direction. To do this, the metric takes into account the total finger force and the maximum force done by the finger.
+This paper \cite{ferrari1992planning} explains the metric of the "Largest-minimum resisted wrench" that attempts to find a largest resisted wrench in any direction. To do this, the metric takes into account the total fingers force and the maximum of all forces done by each finger.
 \par
-It is assumed that the grasp's configuration used is a Force Closure Grasp (FCG), whose definition is a grasp that is able to balance externally applied forces and torques on the object (grasps that can not balance external torques and forces are not considered).
-It is also assumed that the contacts between the object and the points of contact are "Hard-Contact", i.e. between the two contact surfaces (of the object and the contact point) there is friction.
+It is assumed that the grasp's configuration used is a Force Closure Grasp (FCG), whose definition is a grasp that is able to balance externally applied forces and torques on the object.
+It is also assumed that the contacts between the object and the points of contact are "Hard-Contact", i.e. between the two contact surfaces (of the object and the contact point) exists friction.
 \par
 The forces and torques that acts on an object or on contact points can be represented in a 6 dimensions space (3 dimensions for the total momentum acting on the object and the other 3 dimensions to represent the force). This space is called the wrench space ($\mathcal{W}$). To simplify, a wrench can be expressed as set of force ($F$) and torque ($\tau$) vectors, and from a mathematical point of view, the wrench can be defined as $w = [F^T\ \tau^T]^T$ and its magnitude by $||w|| = \sqrt{||F||^2 + \lambda||\tau||^2}$, where $\lambda$ is a scaling value between force and torque.
 
 \subsection{The quality of the grasp}
-When it comes time to choose measurement quality, there may be configurations that are better than others, i.e. there are configurations can balance these external wrenches without having to apply too much force. An intuitive way to quantify the grasp quality would be to use the ratio of the magnitude of the largest resisted wrench in any direction and the magnitude of the forces applied by the fingers.
+When it comes time to choose the quality measure, there may be configurations that are better than others, i.e. there are configurations can balance these external wrenches without having to apply too much force. An intuitive way to quantify the grasp quality would be to use the ratio of the magnitude of the largest resisted wrench in any direction and the magnitude of the forces applied by the fingers.
 
 \subsubsection{Representing the finger forces}
 
@@ -20,13 +21,198 @@ In order to compute the forces made by the fingers on the objects, it is necessa
 For this to happen, it is necessary that the Coulomb's law should be verified.
 
 Coulomb's law can be defined as: $f_i^{\bot} \ge \mu f_i^t$ where $f_i^{\bot}$ represents the force along the normal to the object's surface on the contact point and $ f_i^t$ is the tangential force to the object surface. 
-This law can be graphically interpreted through a friction cone, that when the force exerted on the object is inside that cone, the contact point is stable, otherwise there is slipping of the object or its detachment.
+This law can be graphically interpreted through a friction cone, that when the force exerted on the object is inside that cone, the contact point is stable, otherwise there is slippage of the object or its detachment.
 
-The forces acting on the object can be decomposed as linear combinations of the extrema of the friction cone. So in order to do this, the friction cone can be approximated by a with a pyramid of m edges.
-Thus the force applied at the contact point ($f_i$) can be given by the expression \eqref{eq:primitive_forces}, where $\alpha_h > 0$ and $\sum_{h=1}^{m}\alpha_h = 1   $
-
+The forces acting on the object can be decomposed as linear combinations of the extrema of the friction cone. So in order to do this, the friction cone can be approximated by a with a pyramid of $m$ edges.
+Thus the force applied at the contact point ($f_i$) can be given by the expression \eqref{eq:primitive_forces}, where $\alpha_h > 0$ and $\sum_{h=1}^{m}\alpha_h = 1$
 \begin{equation}\label{eq:primitive_forces}
     f_i= \sum_{h=1}^{m}\alpha_{i,j}f_{i,h}
 \end{equation}
-    
+It is known that only the normal component of the contact force ($f_i$) is not sufficient to specify the contact force, since there are several contact forces satisfying the equation \eqref{eq:primitive_forces} and that have the same normal magnitude.
 
+Let be defined a vector g composed of the normal forces in $n$ contact points by $g= (f_1^{\bot}, \dots, f_n^{\bot})^T $ and a predicate $A: \mathcal{W} \times \mathcal{G} \rightarrow \{T, F\}$, where $\mathcal{G}$ is a set of all possible generalized forces $g$. $wAg$ is true if the wrench $w$ belongs to the set of wrenches that can be resisted through generalized force $g$. 
+\par
+Also, $wA$ can be defined as the set of generalized forces that can resist a wrench $w$, and $Ag$ is a set of wrenches $w$ that can be resisted through a generalized force $g$. This can be represented by the equation \eqref{eq:defintion_Apredicate}.
+\begin{equation}\label{eq:defintion_Apredicate}
+    wA= \Big\{g\ |\ wAg\ is\ true \Big\} \quad and   \quad  Ag= \Big\{w\ |\ wAg\ is\ true \Big\}
+\end{equation}
+
+\subsubsection{Grasp quality measure}
+The local quality measure ($LQ$) is the best ratio between the resulting wrench and a given generalized force for that wrench. This measure can be given by \eqref{eq:LQ_measure}.
+\begin{equation}\label{eq:LQ_measure}
+        LQ_w=   \max_{g \in wA}\frac{||w||}{||g||}
+\end{equation}
+With this, the grasp quality measure ($Q$) can be given as the minimum of all maxima wrenches that can be resisted by each contact point. Which is the worst-case scenario where the object can fall from the hand.
+\begin{equation}\label{eq:Q_LMRW}
+    Q= \min_w LQ_w
+\end{equation}
+Due to the invariance of $Q$, minimizing $w$ means minimize over the directions of $w$. Thus \eqref{eq:Q_LMRW} can be rewritten as in \eqref{eq:Q_LMRW2}, where $\hat{w} = w/||w||$ and $||w||$ is such that $||g||= 1 $.
+\begin{equation}\label{eq:Q_LMRW2}
+    Q=\min_{\hat{w}}\ LQ_{\hat{w}}
+\end{equation}
+Also, it can be defined a set $B \subset A$, such as $B = \{ (w,g)\ |\ wAg\ is\ true\ and\ ||g||=1 \}$,  which is equivalent to define a predicate $B:\mathcal{W} \times \mathcal{G} \rightarrow \{ T, F \}$, such that $wBg$ is true, $w \in Ag$ and $||g|| = 1$.
+And like what was defined with the predicate A in equation \eqref{eq:defintion_Apredicate}, it can be done the same with predicate B, as can be seen in equation~\eqref{eq:defintion_Bpredicate}.
+\begin{equation}\label{eq:defintion_Bpredicate}
+    wB= \Big\{g\ |\ wAg\ is\ true\ and\ ||g||=1 \Big\} \quad and   \quad  Bg= \Big\{w\ |\ wAg\ is\ true\ and\ ||g||=1 \Big\}
+\end{equation}
+So, $LQ_{\hat{w}}$ can be rewritten like in \eqref{eq:LQ2}, where $B\mathcal{G}$ is a set of all sets $Bg$.
+\begin{equation}\label{eq:LQ2}
+    LQ_{\hat{w}}= \max_{w \in B \mathcal{G}} ||w||
+\end{equation}
+Taking the maximum of the wrench module that belongs to the set $B\mathcal{G}$,  means taking the wrenches that are on the boundary of  that set. And thus $LQ_{\hat{w}}$ and $Q$ can be written like \eqref{eq:LQ_Q_new}.
+\begin{equation}\label{eq:LQ_Q_new}
+    LQ_{\hat{w}} = \Big\{   ||w||\ |\ w\ \in Bd(B\mathcal{G}) \Big\} \quad and \quad Q = \min_{\hat{w}} \Big\{ ||w||\ |\ w \in Bd(B\mathcal{G} \Big\}
+\end{equation}
+$Q$ can  be also seen as the distance from the closest point of the boundary $B\mathcal{G}$ to the wrench space origin, in other words, $Q$ is the radius of the largest sphere centered on the origin and it's contained on the boundary $B\mathcal{G}$. So Q is given by \eqref{eq:Q_lasgest_radius}.
+
+\begin{equation}\label{eq:Q_lasgest_radius}
+    Q= \min_{w \in Bd(B\mathcal{G}} ||w||
+\end{equation}
+
+\subsubsection{Minimizing the maximum finger force}
+The optimal grasp configuration is the one that can resist the largest wrench in any direction, with the minimum applied force by each finger. Moreover, the force that a finger can do is upper bounded and the value considered for this upper limit is 1. This only can be assumed because the metric considers the ratio between wrenches and applied forces, that scale linearly with each other.
+
+Considering the equation \eqref{eq:force_and_torque} that gives the force at the i-th ($f_i$) contact and the reacting torque $\tau_i$, where $r_i$ is the vector pointing from the object's center of mass to the contact point.
+\begin{equation}\label{eq:force_and_torque}
+     f_i= \sum_{j=1}^{m}\alpha_{i,j}f_{i,j} \quad and \quad  \tau_i= \sum_{j=1}^{m}\alpha_{i,j}( r_i \times f_{i,j} )
+\end{equation}
+Thus the wrench ($w_i$) and the set of all possible wrenches originated at the contact $i$ ($W_i$) can be given by \eqref{eq:conctact_point_wrench}.
+\begin{equation}\label{eq:conctact_point_wrench}
+    w_i= \sum_{j=1}^{m}\alpha_{i,j}w_{i,j} \quad and \quad 
+    W_i=\bigg\{w_i | w_i=\sum_{j=1}^{m}\alpha_{i,j}w_{i,j}, \alpha_{i,j}\ge 0, \sum_{j=1}^{m}\alpha_{i,j}\ge 0 \bigg\}
+\end{equation}
+And therefore the total wrench ($w$) applied to the object is the sum of all wrenches that are applied at each contact. So, now it's is possible to generate a set ($B\mathcal{G}$) with all possible wrenches that can be applied to the object, as shown in the expression \eqref{eq:total_wrench_all_possible_wrench}.
+\begin{equation}\label{eq:total_wrench_all_possible_wrench}
+    w=\sum_{i=1}^n \quad and \quad
+       B\mathcal{G}=W_{L_{\infty}}=W_1 \oplus ... \oplus W_n
+\end{equation}
+The set with all combinations of the wrenches that can be applied at the object can be obtained through the Minkowski sum of convex sets of contact points $W_i$.
+Also the the Minkowski sum can be exchanged with the Convex Hull operation, so the Convex Hull can be given by the expression \eqref{eq:convex_hull}.
+\begin{equation}\label{eq:convex_hull}
+    W_{L_{\infty}}= Convex Hull\Bigg(\bigoplus_{i=1}^{n} \{ w_{i,1}, ..., w_{i,m} \} \Bigg)
+\end{equation}
+The advantage of using the Convex Hull relies on the efficient way to compute $W_{L_{\infty}}$, starting from the primitive wrenches which describes each contact point.
+The quality measure ($Q_{\infty}$) can be seen as the distance of nearest facet of the Convex Hull from the origin.
+
+\subsubsection{Minimizing the total finger force}
+In this case, it is assumed that the force exerted by all the fingers is upper bounded, being this bound equals to 1, which is equivalent to say $||g|| = 1$.
+The goal is to minimize the force done by all fingers in the object, so the total force can be defined as in \eqref{eq:total_force}, moreover, every $f_i$ is on the friction cone and thus the total force can be written as the convex combination of the vector along the extrema of the friction cone.
+\begin{equation}\label{eq:total_force}
+    f= \sum_{i=0}^{n}f_i \quad and \quad
+    f= \sum_{i=0}^{n}\sum_{j=0}^{m}\alpha_{i,j}f_{i,j} \quad where \quad \alpha_{i,j} \ge 0 \quad and \quad \sum_{i=0}^{n}\sum_{j=0}^{m}\alpha_{i,j}f_{i,j} \le 1
+\end{equation}
+Just like the total force to the object, the total wrench can be expressed as \eqref{eq:total_wrench}.
+\begin{equation}\label{eq:total_wrench}
+    w= \sum_{i=0}^{n}\sum_{j=0}^{m}\alpha_{i,j}w_{i,j}
+\end{equation}
+The total wrench exerted on the object belongs to a set such that the wrenches correspond to the primitive contacts on the object. So, the set of all possible wrenches can be given by \eqref{eq:convex_hull2}, which can be computed through the Convex Hull over a finite set of points. The quality measure ($Q_1$) can be seen as the nearest facet of the Convex Hull from the origin.
+\begin{equation}\label{eq:convex_hull2}
+    W_{L_1}= Convex Hull\Bigg(\bigcup_{i=0}^{n}\{w_{i,1},..., w_{i,m}\}\Bigg)
+\end{equation}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%% GRASP QUALITY EVALUATION IN UNDER-ACTUATED HANDS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Grasp Quality Evaluation in Underactuated Robotic Hands}
+There are several types of metrics based on the geometric location of the contact points or the configuration of the hand.
+In the case of underactuated hands, these metrics are not straightforward due to their nature.
+But because of the way the hand is drawn, it can take care of the shape of the hand to grasp the object and thus it's no longer necessary to find specific contact points or pre-compute the configuration of the hand. \par
+The consideration of the limit of the forces that the hand can apply on the object facilitates the definition of contact robustness, i.e., how far the contact is from violating the contact constrains.
+There are two grasp quality measures that can be defined through the effective capacity of the robotic hand to apply contact forces.
+This metrics are: the Potential Contact Robustness (PCR) and the Potential Grasp Robustness (PGR).
+
+\subsection{Measures based on the wrench space}
+Different quality measures analyze the Grasp Wrench Space (GWS) in order to find the best grasp. One of the most known of these metrics is the largest minimum resisted wrench.
+As stated in the section \ref{section:LMRW}, there are two ways to construct the set of wrenches that can be applied to the object. One limits the sum of all contact forces ($GWS_S$), while the other limits the individual contact forces ($GWS_F$).
+The $GWS_S$ is more relevant for hands with a single actuator and $GWS_F$ for hands with multiple actuators. \par
+In the case of multi-fingered underactuated hands, there may be some contacts that are controlled by one actuator or contacts that are individually  controlled by one actuator. 
+To take this into account, a actuation matrix $A  \in \rm I\!R^{n_a \times n_c}$, where $n_a$ is is the number of actuators. For each actuator (i.e each row), the contact points (columns) are filled with 1's in case of the actuator has direct influence on those contacts, otherwise it will be filled with 0's.\par
+Through the actuation matrix, it is possible to know the set of combinations of wrenches affected by the same actuator. This set can be given by equation \eqref{eq:atuator-wise}.
+\begin{equation}\label{eq:atuator-wise}
+    w_i^{d,a}= \bigcup_{j=1}^{n_c}
+        \begin{cases}
+        w_j^{d,c} & \ \text{if } \texttt{A}_{i,j} = 1\\
+        \textit{empty} &  \text{otherwise}
+    \end{cases}
+\end{equation}
+
+Also, it can be attached all of the sets of wrenches affected by each actuator individually. Thus the $GWS_U$ can be given by the expression \eqref{eq:minkowski_actuator_wise}
+
+\begin{equation}\label{eq:minkowski_actuator_wise}
+    GWS_U = CH\Bigg[
+    \mathcal{P}=\bigcup_{i=1}^{n_a}\Bigg(\bigcup_{j=1}^{{}^iC_{n_a}} \big( \bigoplus \mathcal{W}_j^a \big) \Bigg) \Bigg]
+    \quad with \quad \mathcal{W}^a_j \in 
+\left( \begin{array}{c}
+             \mathcal{W}^a    \\
+              i  
+    \end{array} \right) 
+\end{equation}
+
+To compute the maximum contact forces realizable by each finger, first the unit contact normal force $f_i$ of each contact $i$ can be represented by $\mathfrak{f}_i$. Second, $\mathfrak{F}_j$ is the set of all unit contact forces generated by the finger $j$. The torques $\tau_j$ needed to achieve  $\mathfrak{F}_j$ are calculated with the joint configuration $q_j$ and the corresponding body Jacobian $J(q_j)$ like it can be seen on the equation \eqref{eq:torqueThroughforces}.
+\begin{equation}\label{eq:torqueThroughforces}
+    \tau_j = J(q_j)^T \cdot \mathfrak{F}_j
+\end{equation}
+
+The finger torque $\tau_j$ is scaled by a factor $k$ until one of the joints reaches its limit. Then the maximum realizable normal force at the contact point $i$ is given by $k\mathfrak{f}_i$ and by using the realizable force for each contact, the quality measure represents the maximum magnitude wrench the a finger can resist.
+
+\subsection{Measures of Contact and Grasp Robustness}
+
+\subsubsection{Potential Contact Robustness}
+
+Once that the hand is underactuated, the contacts and joints are not perfectly rigid and their stiffness can be linearly modeled by $K_s \in \rm I\!R^{3n_c \times 3n_c} $, which is contact stiffness matrix, and $K_p \in \rm I\!R^{n_q \times n_q} $ is the joint stiffness matrix.
+Therefore, the variation of grasp variables can be written as in \eqref{eq:force_torque_variation}, where $\Delta q_r$ is a variation of the reference joint configuration.
+
+\begin{equation}\label{eq:force_torque_variation}
+     \Delta f = K_s(J \Delta q - G^T\Delta u) \quad and \quad
+     \Delta \tau = K_p(\Delta q_r - \Delta q)
+ \end{equation}
+    
+The vector $d$ represents how far a grasp is from violating the friction constrains and the maximum force limits. The expression \eqref{eq:vetor_d} shows this vector, where $d_{i,c}$ is the normal component of the $i^{th}$ contact force ($d_{i,c} = f_{i,n} $), $d_{i,f}$ is the distance of \texttt{$f_i$} from the friction cone and $d_{i,max} = f_{i,max} - ||f_i||$.\par
+\begin{equation}\label{eq:vetor_d}
+    d(f) = [d_{1,c}, d_{1,f}, d_{1,max}, \dots, d_{n_c,c}, d_{n_c,f}, d_{n_c,max}]
+\end{equation}
+Then, $||\Delta f|| \le d_{min}$ is sufficient to have a contact force perturbation $\Delta f$ such that constrains of Coulomb law are not violated and $d_{min}$ is the minimum value of $d$.
+
+Through the constrain above, the constraint of the external disturbance $\Delta w$ acting on the object can be represented as in \eqref{eq:deltaW}.
+ \begin{equation}\label{eq:deltaW}
+     ||\Delta w || = \frac{d_{min}}{\sigma_{max}(\texttt{G}_K^R)}
+ \end{equation}
+ Where $\texttt{G}_K^R = \texttt{KG}^T(\texttt{GKG}^T)$ and $ \texttt{K} =( \texttt{K}_s^{-1} + \texttt{JK}_p^{-1}\texttt{J}^T)$ is the grasp stiffness matrix, and $\sigma_{max}(\texttt{G}_K^R)$ is the maximum singular value of $\texttt{G}_K^R$.
+ Also, $f = -G_K^R w + Ey$ represents the controllable contact forces and where $E$ is a basis for the subspace $\mathcal{F}_a$ of the controllable internal forces. $y$ is a vector that parameterizes that subspace.
+ \par
+ The Potential Contact Robustness (PCR) is defined as \eqref{eq:PCR}, where $d_{min}^{\mathcal{F}_a}= \min\{d(G_K^R w+ Ey\}$ is a function of $y$.
+ \begin{equation}\label{eq:PCR}
+    PCR = \max_y\frac{d_{min}^{\mathcal{F}_a}}{\sigma_{max}(G_K^R)}
+\end{equation} 
+ 
+Any disturbance wrench $\Delta w$ that $||\Delta w||< PCR$ can be resisted without having any object's slippage or detachment, since that the internal forces are actuated. 
+
+\subsubsection{Potential Grasp Robustness}
+Grasps that contain many points of contact (such as grasps performed by underactuated hands) can still be stable and be able to resist external wrenches even if there are detached or slipping contact points.However, PCR may underestimate the grasp quality.
+
+The PGR extends the PCR, admitting that a grasp can still be stable even if there are contacts that do not satisfy the friction constrains. These friction constrain are given by \eqref{eq:positive_contrain} and \eqref{eq:comlumbLaw}.
+
+\begin{equation}\label{eq:positive_contrain}
+    f_{i,n} \ge 0
+\end{equation}
+
+\begin{equation}\label{eq:comlumbLaw}
+    \sqrt{f_{i,t_1}^2+f_{i,t_2}^2} \le \mu_i  f_{n,t_2}
+\end{equation}
+Thus the PGR admits that each contact point is in one of the following 3 cases:
+\begin{itemize}
+    \item State 1: It considers as valid the equations \eqref{eq:positive_contrain} and \eqref{eq:comlumbLaw}, being that the contact force can be transmitted in any direction.
+    \item State 2: Only the constraint \eqref{eq:positive_contrain} is verified, and the force is transmitted through the normal direction to the contact.
+    \item State 3: Non of the constrains are verified. Then it's considered that the contact is detached.    
+\end{itemize}
+Assuming that there are $n_c$ contact points and that each of the contacts may be in one of the 3 previous states, there will be $3^{n_c}$ possible combinations $C_j$ and each of them will have a global matrix of stiffness.
+The PGR can be seen as the maximum PCR index of all possible combinations $C_j$ and it can be computed as in \eqref{eq:PGR}.
+\begin{equation}\label{eq:PGR}
+    PGR = \max_{G_j, j=1,\dots, n_c}PCR(C_j)
+\end{equation}
+Also PCR can be seen as a specific case of PGR, where the best grasp have all contact points in the state 1.\par
+These metrics take into account the hands actuated by postural synergies. These synergies are highly coordinated movements by the brain, which control the shape of the hand when grasping the object.
+These synergies can be used to reduce the number of actuators without affecting their performance. \par
+When comparing the two metrics it is verified that both the PGR and the PCR are not decreasing with the increase in the use of the synergies. Moreover, the greater the number of synergies used, the greater the subspace of controllable internal forces.
+In conclusion, PGR is less conservative but more realistic than PGR, and thus it is better to detect stable grasps.
